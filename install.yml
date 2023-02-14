@@ -1,0 +1,27 @@
+---
+- hosts: aws
+  remote_user: root  
+  become: true
+  vars:
+    doc_root: /var/www/html
+  tasks:
+    - name: "instalando Apache + PHP"
+      apt: name={{ item }} state=present
+      with_items:
+        - apache2
+        - php
+
+    - name: "Criando diretorio"
+      file: path={{ doc_root }} state=directory
+
+    - name: "Removendo index.html"
+      file: path={{ doc_root }}/index.html state=absent
+
+    - name: "Copiando index.php"
+      copy: src=app/index.php dest={{ doc_root }}/index.php
+      tags:
+        - simple_copy
+
+    - name: "Restart Apache"
+      service: name=apache2 state=restarted
+      
